@@ -1,0 +1,18 @@
+GET http://localhost:8080/
+
+###
+
+POST http://localhost:8080/api/users
+Content-Type: application/json
+
+{
+    "Email":    "justinponpras@gmail.com",
+    "Password": "Password123"
+}
+
+###
+
+POST http://localhost:8080/admin/reset
+
+
+###

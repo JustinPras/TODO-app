@@ -62,7 +62,10 @@ func main() {
 
 	mux.Handle("/", http.FileServer(http.Dir(filepathRoot)))
 
+	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
+
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
+	mux.HandleFunc("POST /api/login", apiCfg.handlerLogin)
 
 
 	srv := &http.Server{
