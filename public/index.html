@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TODO App</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <h1>
+        TODO App
+        <span class="subtitle">The #1 tool for keeping organised</span>
+      </h1>
+      <button onclick="logout()">Logout</button>
+    </div>
+
+    <div id="auth-section">
+      <h2>Login</h2>
+      <form id="login-form">
+        <input
+          class="input-area"
+          type="email"
+          id="email"
+          placeholder="Email"
+          required
+        />
+        <input
+          class="input-area"
+          type="password"
+          id="password"
+          placeholder="Password"
+          required
+        />
+        <div class="button-container">
+          <button type="submit">Login</button>
+          <button onclick="signup()" type="button">Signup</button>
+        </div>
+
+        <div id="tasks-section" style="display: none">
+            <h2>All Tasks</h2>
+            <ul id="task-list"></ul>
+            <h2>Create Task</h2>
+            <form id="task-form">
+              <input
+                class="input-area"
+                type="text"
+                id="task"
+                placeholder="Task"
+                required
+              />
+              <textarea
+                class="input-area"
+                id="task-due-date"
+                placeholder="Task Due Date"
+                required
+              ></textarea>
+              <div class="button-container">
+                <button type="submit">Add Task</button>
+              </div>
+            </form>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
