@@ -51,13 +51,14 @@ func (q *Queries) DeleteChirp(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const getTasksforUser = `-- name: GetTasksforUser :many
+const getTasksByUserID = `-- name: GetTasksByUserID :many
 SELECT id, created_at, updated_at, body, user_id FROM tasks
 WHERE user_id = $1
+ORDER BY created_at ASC
 `
 
-func (q *Queries) GetTasksforUser(ctx context.Context, userID uuid.UUID) ([]Task, error) {
-	rows, err := q.db.QueryContext(ctx, getTasksforUser, userID)
+func (q *Queries) GetTasksByUserID(ctx context.Context, userID uuid.UUID) ([]Task, error) {
+	rows, err := q.db.QueryContext(ctx, getTasksByUserID, userID)
 	if err != nil {
 		return nil, err
 	}

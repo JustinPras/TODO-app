@@ -9,9 +9,10 @@ VALUES (
 )
 RETURNING *;
 
--- name: GetTasksforUser :many
+-- name: GetTasksByUserID :many
 SELECT * FROM tasks
-WHERE user_id = $1;
+WHERE user_id = $1
+ORDER BY created_at ASC;
 
 -- name: DeleteChirp :exec
 DELETE FROM tasks
