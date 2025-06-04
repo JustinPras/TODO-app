@@ -2,10 +2,25 @@ package auth
 
 import (
 	"fmt"
-	// "time"
-	// "strings"
+	"time"
+	"net/http"
+	"strings"
+	"crypto/rand"
+	"encoding/hex"
+	"context"
 
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/JustinPras/TODO-app/internal/database"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
+)
+
+type TokenType string
+
+const (
+	// TokenTypeAccess -
+	TokenTypeAccess TokenType = "TODO-access"
 )
 
 
@@ -69,4 +84,36 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	return userID, nil
+}
+
+func GetBearerToken(headers http.Header) (string, error) {
+	authHeader := headers.Get("Authorization")
+	if authHeader == "" {
+		return "", fmt.Errorf("Authorization header does not exist")
+	}
+
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+	
+	return tokenString, nil
+}
+
+func MakeRefreshToken(db *database.Queries, userID uuid.UUID, expiresIn time.Time) (string, error) {
+	key := make([]byte, 32)
+	rand.Read(key)
+
+	keyString := hex.EncodeToString(key)
+
+	refreshTokenParams := database.CreateRefreshTokenParams{
+		Token: 		keyString,
+		UserID:		userID,
+		ExpiresAt:	expiresIn,
+	}
+
+	refreshToken, err := db.CreateRefreshToken(context.Background(), refreshTokenParams)
+	if err != nil {
+		return "", fmt.Errorf("Could not create refresh token: %w", err) 
+	}
+
+	return refreshToken.Token, nil
 }

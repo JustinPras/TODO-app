@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/JustinPras/Chirpy/internal/auth"
+	"github.com/JustinPras/TODO-app/internal/auth"
 )
 
 func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
@@ -46,6 +46,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create access JWT", err)
 	}
+	w.Header().Set("Authorization", accessToken)
 
 	refreshTokenExpirationDate := time.Now().Add(30*24*time.Hour) // month duration
 
