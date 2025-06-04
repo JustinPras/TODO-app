@@ -69,8 +69,8 @@ async function login() {
     if (data.token) {
         localStorage.setItem('token', data.token);
         document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('video-section').style.display = 'block';
-        await getVideos();
+        document.getElementById('task-section').style.display = 'block';
+        await getTasks();
     } else {
         alert('Login failed. Please check your credentials.');
     }
@@ -105,7 +105,7 @@ async function signup() {
 function logout() {
     localStorage.removeItem('token');
     document.getElementById('auth-section').style.display = 'block';
-    document.getElementById('video-section').style.display = 'none';
+    document.getElementById('task-section').style.display = 'none';
 }
 
 const taskStateHandler = createTaskStateHandler();
@@ -149,6 +149,8 @@ function createTaskStateHandler() {
   };
 }
 
+let currentTask = null;
+
 async function getTask(taskID) {
   try {
     const res = await fetch(`/api/tasks/${taskID}`, {
@@ -162,59 +164,32 @@ async function getTask(taskID) {
     }
 
     const task = await res.json();
-    viewTask(task);
+    currentTask = task;
+    // viewTask(task);
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
 }
 
-let currentVideo = null;
-
-function viewVideo(video) {
-  currentVideo = video;
-  document.getElementById('video-display').style.display = 'block';
-  document.getElementById('video-title-display').textContent = video.title;
-  document.getElementById('video-description-display').textContent = video.description;
-
-  const thumbnailImg = document.getElementById('thumbnail-image');
-  if (!video.thumbnail_url) {
-    thumbnailImg.style.display = 'none';
-  } else {
-    thumbnailImg.style.display = 'block';
-    thumbnailImg.src = video.thumbnail_url;
-  }
-
-  const videoPlayer = document.getElementById('video-player');
-  if (videoPlayer) {
-    if (!video.video_url) {
-      videoPlayer.style.display = 'none';
-    } else {
-      videoPlayer.style.display = 'block';
-      videoPlayer.src = video.video_url;
-      videoPlayer.load();
-    }
-  }
-}
-
-async function deleteVideo() {
-  if (!currentVideo) {
-    alert('No video selected for deletion.');
+async function deleteTask() {
+  if (!currentTask) {
+    alert('No task selected for deletion.');
     return;
   }
 
   try {
-    const res = await fetch(`/api/videos/${currentVideo.id}`, {
+    const res = await fetch(`/api/tasks/${currentTask.id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
     if (!res.ok) {
-      throw new Error('Failed to delete video.');
+      throw new Error('Failed to delete task.');
     }
-    alert('Video deleted successfully.');
-    document.getElementById('video-display').style.display = 'none';
-    await getVideos();
+    alert('Task deleted successfully.');
+    document.getElementById('task-display').style.display = 'none';
+    await getTasks();
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
