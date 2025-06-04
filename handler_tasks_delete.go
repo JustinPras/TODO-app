@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"github.com/JustinPras/Tasky/internal/auth"
+	"github.com/JustinPras/TODO-app/internal/auth"
 	"github.com/google/uuid"
 )
 
