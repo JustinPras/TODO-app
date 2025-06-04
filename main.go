@@ -70,6 +70,7 @@ func main() {
 	mux.HandleFunc("GET /api/tasks", apiCfg.handlerTasksRetrieve)
 	mux.HandleFunc("GET /api/tasks/{taskID}", apiCfg.handlerTasksGet)
 	mux.HandleFunc("POST /api/tasks", apiCfg.handlerTasksCreate)
+	mux.HandleFunc("DELETE /api/tasks/{taskID}", apiCfg.handlerTasksDelete)
 	
 
 
