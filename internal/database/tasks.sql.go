@@ -41,14 +41,32 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 	return i, err
 }
 
-const deleteChirp = `-- name: DeleteChirp :exec
+const deleteTask = `-- name: DeleteTask :exec
 DELETE FROM tasks
 WHERE id = $1
 `
 
-func (q *Queries) DeleteChirp(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteChirp, id)
+func (q *Queries) DeleteTask(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteTask, id)
 	return err
+}
+
+const getTaskByID = `-- name: GetTaskByID :one
+SELECT id, created_at, updated_at, body, user_id FROM tasks
+WHERE id = $1
+`
+
+func (q *Queries) GetTaskByID(ctx context.Context, id uuid.UUID) (Task, error) {
+	row := q.db.QueryRowContext(ctx, getTaskByID, id)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Body,
+		&i.UserID,
+	)
+	return i, err
 }
 
 const getTasksByUserID = `-- name: GetTasksByUserID :many

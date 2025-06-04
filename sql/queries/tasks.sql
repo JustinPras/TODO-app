@@ -14,6 +14,10 @@ SELECT * FROM tasks
 WHERE user_id = $1
 ORDER BY created_at ASC;
 
--- name: DeleteChirp :exec
+-- name: GetTaskByID :one
+SELECT * FROM tasks
+WHERE id = $1;
+
+-- name: DeleteTask :exec
 DELETE FROM tasks
 WHERE id = $1;
