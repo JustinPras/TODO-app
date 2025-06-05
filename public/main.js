@@ -21,32 +21,32 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 });
 
 async function createTask() {
-    const title = document.getElementById('task').value;
-    const description = document.getElementById('task-due-date').value;
-  
-    try {
-      const res = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ title, description }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(`Failed to create task: ${data.error}`);
-      }
-  
-      const taskID = data.id;
-      if (taskID) {
-        await getTasks();
-        await taskStateHandler(taskID);
-      }
-    } catch (error) {
-      alert(`Error: ${error.message}`);
+  const body = document.getElementById('task').value;
+
+  try {
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ body }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(`Failed to create task: ${data.error}`);
     }
+
+    const taskID = data.id;
+    if (taskID) {
+      await getTasks();
+      await taskStateHandler(taskID);
+    }
+  } catch (error) {
+    alert(`Error: ${error.message}`);
   }
+  console.log("Task created successfully: ", body)
+}
   
   
 async function login() {
@@ -111,6 +111,7 @@ function logout() {
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
+  console.log('Refetching tasks...');
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -124,12 +125,19 @@ async function getTasks() {
     }
 
     const tasks = await res.json();
+    console.log('Fetched tasks:', tasks);
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
     for (const task of tasks) {
       const listItem = document.createElement('li');
-      listItem.textContent = task.title;
-      listItem.onclick = () => taskStateHandler(task.id);
+      listItem.textContent = task.body;
+      listItem.onclick = () => {
+        const items = taskList.querySelectorAll('li');
+        items.forEach(item => item.classList.remove('selected'));
+        listItem.classList.add('selected');
+
+        taskStateHandler(task.id);
+      };
       taskList.appendChild(listItem);
     }
   } catch (error) {
@@ -187,8 +195,8 @@ async function deleteTask() {
     if (!res.ok) {
       throw new Error('Failed to delete task.');
     }
-    alert('Task deleted successfully.');
-    document.getElementById('task-display').style.display = 'none';
+    console.log("Task deleted successfully!")
+    currentTask = null;
     await getTasks();
   } catch (error) {
     alert(`Error: ${error.message}`);

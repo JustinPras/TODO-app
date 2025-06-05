@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TODO App</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="app.js" defer></script>
+    <script src="main.js?v=={{ new Date().getTime() }}" defer></script>
   </head>
   <body>
     <div class="nav-bar">
@@ -37,30 +37,29 @@
           <button type="submit">Login</button>
           <button onclick="signup()" type="button">Signup</button>
         </div>
+      </form>
+    </div>
 
-        <div id="tasks-section" style="display: none">
-            <h2>All Tasks</h2>
-            <ul id="task-list"></ul>
-            <h2>Create Task</h2>
-            <form id="task-form">
-              <input
-                class="input-area"
-                type="text"
-                id="task"
-                placeholder="Task"
-                required
-              />
-              <textarea
-                class="input-area"
-                id="task-due-date"
-                placeholder="Task Due Date"
-                required
-              ></textarea>
-              <div class="button-container">
-                <button type="submit">Add Task</button>
-              </div>
-            </form>
+    <div id="task-section" style="display: none">
+      <h2>All Tasks</h2>
+      <ul id="task-list"></ul>
+      <div class="button-container mb-4">
+        <button onclick="deleteTask()">Delete Task</button>
+      </div>
+      <h2>Create Task</h2>
+      <form id="task-form">
+        <input
+          class="input-area"
+          type="text"
+          id="task"
+          placeholder="Task"
+          required
+        />
+        <div class="button-container">
+          <button type="submit">Add Task</button>
         </div>
+      </form>
+    </div>
       </form>
     </div>
   </body>
