@@ -220,7 +220,6 @@ async function deleteTask() {
     alert('No task selected for deletion.');
     return;
   }
-
   try {
     const res = await fetch(`/api/tasks/${currentTask.id}`, {
       method: 'DELETE',
@@ -236,5 +235,50 @@ async function deleteTask() {
     await getTasks();
   } catch (error) {
     alert(`Error: ${error.message}`);
+  }
+}
+
+const editTaskBtn = document.getElementById('edit-task-btn');
+const editTaskContainer = document.getElementById('edit-task-container');
+const editTaskInput = document.getElementById('edit-task-input');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+const confirmEditBtn = document.getElementById('confirm-edit-btn');
+
+async function editTask() {
+  if (!currentTask) {
+    alert('No task selected to edit.');
+    return;
+  }
+
+  editTaskInput.value = currentTask.body;
+  editTaskContainer.style.display = 'block';
+
+  cancelEditBtn.onclick = () => {
+    editTaskInput.value = '';
+    editTaskContainer.style.display = 'none';
+  };
+
+  confirmEditBtn.onclick = async () => {
+    const newBody = editTaskInput.value;
+    if (!newBody || !currentTask) return;
+
+    try {
+      const res = await fetch(`/api/tasks/${currentTask.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ body: newBody }),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to edit task.');
+      }
+      editTaskContainer.style.display = 'none';
+      editTaskInput.value = '';
+      await getTasks();
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
   }
 }
