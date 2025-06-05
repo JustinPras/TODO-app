@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
   
     if (token) {
+      await getTasks();
+      
       document.getElementById('auth-section').style.display = 'none';
       document.getElementById('task-section').style.display = 'block';
     } else {
@@ -108,11 +110,13 @@ function logout() {
     localStorage.removeItem('token');
     document.getElementById('auth-section').style.display = 'block';
     document.getElementById('task-section').style.display = 'none';
+    resetTaskSelection()
 }
 
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
+  resetTaskSelection()
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -128,6 +132,7 @@ async function getTasks() {
     const tasks = await res.json();
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
+    
     for (const task of tasks) {
       const listItem = document.createElement('li');
       listItem.classList.add('task-item');
@@ -189,6 +194,8 @@ function createTaskStateHandler() {
       currentTaskID = taskID;
 
       await getTask(taskID);
+      editTaskBtn.disabled = false;
+      deleteTaskBtn.disabled = false;
     }
   };
 }
@@ -209,11 +216,17 @@ async function getTask(taskID) {
 
     const task = await res.json();
     currentTask = task;
-    // viewTask(task);
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
 }
+
+const editTaskBtn = document.getElementById('edit-task-btn');
+const deleteTaskBtn = document.getElementById('delete-task-btn');
+const editTaskContainer = document.getElementById('edit-task-container');
+const editTaskInput = document.getElementById('edit-task-input');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+const confirmEditBtn = document.getElementById('confirm-edit-btn');
 
 async function deleteTask() {
   if (!currentTask) {
@@ -237,12 +250,6 @@ async function deleteTask() {
     alert(`Error: ${error.message}`);
   }
 }
-
-const editTaskBtn = document.getElementById('edit-task-btn');
-const editTaskContainer = document.getElementById('edit-task-container');
-const editTaskInput = document.getElementById('edit-task-input');
-const cancelEditBtn = document.getElementById('cancel-edit-btn');
-const confirmEditBtn = document.getElementById('confirm-edit-btn');
 
 async function editTask() {
   if (!currentTask) {
@@ -281,4 +288,10 @@ async function editTask() {
       alert(`Error: ${error.message}`);
     }
   }
+}
+
+function resetTaskSelection() {
+  currentTask = null;
+  editTaskBtn.disabled = true;
+  deleteTaskBtn.disabled = true;
 }

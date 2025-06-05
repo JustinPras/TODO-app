@@ -57,8 +57,8 @@
       <h2>All Tasks</h2>
       <ul id="task-list"></ul>
       <div class="button-container mb-4">
-        <button onclick="editTask()">Edit Task</button>
-        <button onclick="deleteTask()">Delete Task</button>
+        <button id="edit-task-btn" onclick="editTask()" disabled>Edit Task</button>
+        <button id="delete-task-btn" onclick="deleteTask()" disabled>Delete Task</button>
       </div>
 
       <div id="edit-task-container" style="display: none; margin-top: 20px;">
