@@ -116,7 +116,6 @@ function logout() {
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
-  resetTaskSelection()
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
