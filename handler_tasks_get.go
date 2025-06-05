@@ -35,6 +35,7 @@ func (cfg *apiConfig) handlerTasksRetrieve(w http.ResponseWriter, r *http.Reques
 			UpdatedAt:	task.UpdatedAt,
 			Body:		task.Body,
 			UserID:		task.UserID,
+			Completed:	task.Completed,
 		})
 	}
 

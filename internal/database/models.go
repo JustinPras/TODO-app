@@ -26,6 +26,7 @@ type Task struct {
 	UpdatedAt time.Time
 	Body      string
 	UserID    uuid.UUID
+	Completed bool
 }
 
 type User struct {

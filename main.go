@@ -71,8 +71,7 @@ func main() {
 	mux.HandleFunc("GET /api/tasks/{taskID}", apiCfg.handlerTasksGet)
 	mux.HandleFunc("POST /api/tasks", apiCfg.handlerTasksCreate)
 	mux.HandleFunc("DELETE /api/tasks/{taskID}", apiCfg.handlerTasksDelete)
-	
-
+	mux.HandleFunc("PATCH /api/tasks/{taskID}", apiCfg.handlerTasksUpdate)
 
 	srv := &http.Server{
 		Addr:    ":" + port,

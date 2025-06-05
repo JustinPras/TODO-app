@@ -113,7 +113,6 @@ function logout() {
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
-  console.log('Refetching tasks...');
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -127,12 +126,45 @@ async function getTasks() {
     }
 
     const tasks = await res.json();
-    console.log('Fetched tasks:', tasks);
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
     for (const task of tasks) {
       const listItem = document.createElement('li');
-      listItem.textContent = task.body;
+      listItem.classList.add('task-item');
+      const statusCircle = document.createElement('span');
+      statusCircle.classList.add('status-circle');
+      if (task.completed) {
+        statusCircle.classList.add('completed');
+      }
+
+      statusCircle.onclick = async (e) => {
+        e.stopPropagation();
+
+        try {
+          const res = await fetch(`/api/tasks/${task.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+            body: JSON.stringify({ completed: !task.completed }),
+          });
+
+          if (!res.ok) {
+            throw new Error('Failed to update task status.');
+          }
+          await getTasks();
+        } catch (err) {
+          alert(err.message);
+        }
+      };
+
+      const text = document.createElement('span');
+      text.textContent = task.body;
+
+      listItem.appendChild(statusCircle);
+      listItem.appendChild(text);
+
       listItem.onclick = () => {
         const items = taskList.querySelectorAll('li');
         items.forEach(item => item.classList.remove('selected'));
@@ -140,6 +172,7 @@ async function getTasks() {
 
         taskStateHandler(task.id);
       };
+
       taskList.appendChild(listItem);
     }
   } catch (error) {

@@ -17,6 +17,7 @@ type Task struct {
 	UpdatedAt 	time.Time 	`json:"updated_at"`
 	Body 		string 		`json:"body"`
 	UserID		uuid.UUID 	`json:"user_id"`
+	Completed	bool		`json:"completed"`
 }
 
 func (cfg *apiConfig) handlerTasksCreate(w http.ResponseWriter, r *http.Request) {
@@ -61,6 +62,7 @@ func (cfg *apiConfig) handlerTasksCreate(w http.ResponseWriter, r *http.Request)
 		UpdatedAt: 	task.UpdatedAt,
 		Body: 		task.Body,
 		UserID:		task.UserID,
+		Completed:	task.Completed,
 	})
 
 }

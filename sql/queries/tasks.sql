@@ -18,6 +18,20 @@ ORDER BY created_at ASC;
 SELECT * FROM tasks
 WHERE id = $1;
 
+-- name: UpdateTaskBody :one
+UPDATE tasks
+SET body = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
+-- name: UpdateTaskCompletedStatus :one
+UPDATE tasks
+SET completed = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING *;
+
 -- name: DeleteTask :exec
 DELETE FROM tasks
 WHERE id = $1;

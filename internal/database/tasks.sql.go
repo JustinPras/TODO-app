@@ -20,7 +20,7 @@ VALUES (
     $1,
     $2
 )
-RETURNING id, created_at, updated_at, body, user_id
+RETURNING id, created_at, updated_at, body, user_id, completed
 `
 
 type CreateTaskParams struct {
@@ -37,6 +37,7 @@ func (q *Queries) CreateTask(ctx context.Context, arg CreateTaskParams) (Task, e
 		&i.UpdatedAt,
 		&i.Body,
 		&i.UserID,
+		&i.Completed,
 	)
 	return i, err
 }
@@ -52,7 +53,7 @@ func (q *Queries) DeleteTask(ctx context.Context, id uuid.UUID) error {
 }
 
 const getTaskByID = `-- name: GetTaskByID :one
-SELECT id, created_at, updated_at, body, user_id FROM tasks
+SELECT id, created_at, updated_at, body, user_id, completed FROM tasks
 WHERE id = $1
 `
 
@@ -65,12 +66,13 @@ func (q *Queries) GetTaskByID(ctx context.Context, id uuid.UUID) (Task, error) {
 		&i.UpdatedAt,
 		&i.Body,
 		&i.UserID,
+		&i.Completed,
 	)
 	return i, err
 }
 
 const getTasksByUserID = `-- name: GetTasksByUserID :many
-SELECT id, created_at, updated_at, body, user_id FROM tasks
+SELECT id, created_at, updated_at, body, user_id, completed FROM tasks
 WHERE user_id = $1
 ORDER BY created_at ASC
 `
@@ -90,6 +92,7 @@ func (q *Queries) GetTasksByUserID(ctx context.Context, userID uuid.UUID) ([]Tas
 			&i.UpdatedAt,
 			&i.Body,
 			&i.UserID,
+			&i.Completed,
 		); err != nil {
 			return nil, err
 		}
@@ -102,4 +105,58 @@ func (q *Queries) GetTasksByUserID(ctx context.Context, userID uuid.UUID) ([]Tas
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateTaskBody = `-- name: UpdateTaskBody :one
+UPDATE tasks
+SET body = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, created_at, updated_at, body, user_id, completed
+`
+
+type UpdateTaskBodyParams struct {
+	ID   uuid.UUID
+	Body string
+}
+
+func (q *Queries) UpdateTaskBody(ctx context.Context, arg UpdateTaskBodyParams) (Task, error) {
+	row := q.db.QueryRowContext(ctx, updateTaskBody, arg.ID, arg.Body)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Body,
+		&i.UserID,
+		&i.Completed,
+	)
+	return i, err
+}
+
+const updateTaskCompletedStatus = `-- name: UpdateTaskCompletedStatus :one
+UPDATE tasks
+SET completed = $2,
+    updated_at = NOW()
+WHERE id = $1
+RETURNING id, created_at, updated_at, body, user_id, completed
+`
+
+type UpdateTaskCompletedStatusParams struct {
+	ID        uuid.UUID
+	Completed bool
+}
+
+func (q *Queries) UpdateTaskCompletedStatus(ctx context.Context, arg UpdateTaskCompletedStatusParams) (Task, error) {
+	row := q.db.QueryRowContext(ctx, updateTaskCompletedStatus, arg.ID, arg.Completed)
+	var i Task
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Body,
+		&i.UserID,
+		&i.Completed,
+	)
+	return i, err
 }
