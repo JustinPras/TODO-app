@@ -21,8 +21,9 @@ document.getElementById('login-form').addEventListener('submit', async (event) =
 });
 
 async function createTask() {
-  const body = document.getElementById('task').value;
-
+  const body = document.getElementById('task')
+  const bodyValue = body.value;
+  
   try {
     const res = await fetch('/api/tasks', {
       method: 'POST',
@@ -30,13 +31,14 @@ async function createTask() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
-      body: JSON.stringify({ body }),
+      body: JSON.stringify({ body: bodyValue }),
     });
     const data = await res.json();
     if (!res.ok) {
       throw new Error(`Failed to create task: ${data.error}`);
     }
 
+    body.value = '';
     const taskID = data.id;
     if (taskID) {
       await getTasks();
@@ -45,7 +47,7 @@ async function createTask() {
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
-  console.log("Task created successfully: ", body)
+  console.log("Task created successfully: ", bodyValue)
 }
   
   
