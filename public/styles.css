@@ -132,7 +132,7 @@ form {
     border-radius: 5px;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Space between form elements */
+    gap: 10px;
 }
 
 .mb-4 {

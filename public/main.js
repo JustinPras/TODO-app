@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
   
     if (token) {
+      await getTasks()
       document.getElementById('auth-section').style.display = 'none';
       document.getElementById('task-section').style.display = 'block';
     } else {
@@ -10,14 +11,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-document.getElementById('task-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await createTask();
-});
-
 document.getElementById('login-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     await login();
+});
+
+document.getElementById('task-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await createTask();
+});
+
+document.getElementById('task-edit-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await editTask();
 });
 
 async function createTask() {
@@ -42,7 +48,6 @@ async function createTask() {
     const taskID = data.id;
     if (taskID) {
       await getTasks();
-      await taskStateHandler(taskID);
     }
   } catch (error) {
     alert(`Error: ${error.message}`);
@@ -108,11 +113,13 @@ function logout() {
     localStorage.removeItem('token');
     document.getElementById('auth-section').style.display = 'block';
     document.getElementById('task-section').style.display = 'none';
+    resetTaskSelection()
 }
 
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
+  resetTaskSelection()
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -189,6 +196,9 @@ function createTaskStateHandler() {
       currentTaskID = taskID;
 
       await getTask(taskID);
+
+      editTaskBtn.disabled = false;
+      deleteTaskBtn.disabled = false;
     }
   };
 }
@@ -239,12 +249,12 @@ async function deleteTask() {
 }
 
 const editTaskBtn = document.getElementById('edit-task-btn');
+const deleteTaskBtn = document.getElementById('delete-task-btn');
 const editTaskContainer = document.getElementById('edit-task-container');
 const editTaskInput = document.getElementById('edit-task-input');
 const cancelEditBtn = document.getElementById('cancel-edit-btn');
-const confirmEditBtn = document.getElementById('confirm-edit-btn');
 
-async function editTask() {
+async function showEditTaskForm() {
   if (!currentTask) {
     alert('No task selected to edit.');
     return;
@@ -256,29 +266,36 @@ async function editTask() {
   cancelEditBtn.onclick = () => {
     editTaskInput.value = '';
     editTaskContainer.style.display = 'none';
+    resetTaskSelection()
   };
+}
 
-  confirmEditBtn.onclick = async () => {
-    const newBody = editTaskInput.value;
-    if (!newBody || !currentTask) return;
+async function editTask() {
+  const newBody = editTaskInput.value;
+  if (!newBody || !currentTask) return;
 
-    try {
-      const res = await fetch(`/api/tasks/${currentTask.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ body: newBody }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to edit task.');
-      }
-      editTaskContainer.style.display = 'none';
-      editTaskInput.value = '';
-      await getTasks();
-    } catch (error) {
-      alert(`Error: ${error.message}`);
+  try {
+    const res = await fetch(`/api/tasks/${currentTask.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ body: newBody }),
+    });
+    if (!res.ok) {
+      throw new Error('Failed to edit task.');
     }
+    editTaskContainer.style.display = 'none';
+    editTaskInput.value = '';
+    await getTasks();
+  } catch (error) {
+    alert(`Error: ${error.message}`);
   }
+}
+
+function resetTaskSelection() {
+  currentTask = null;
+  editTaskBtn.disabled = true;
+  deleteTaskBtn.disabled = true;
 }

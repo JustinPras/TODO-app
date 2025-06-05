@@ -57,16 +57,18 @@
       <h2>All Tasks</h2>
       <ul id="task-list"></ul>
       <div class="button-container mb-4">
-        <button onclick="editTask()">Edit Task</button>
-        <button onclick="deleteTask()">Delete Task</button>
+        <button id="edit-task-btn" onclick="showEditTaskForm()" disabled>Edit Task</button>
+        <button id="delete-task-btn" onclick="deleteTask()" disabled>Delete Task</button>
       </div>
 
       <div id="edit-task-container" style="display: none; margin-top: 20px;">
-        <input type="text" id="edit-task-input" class="input-area" placeholder="Edit task...">
-        <div class="button-container">
-          <button id="cancel-edit-btn">Exit</button>
-          <button id="confirm-edit-btn">Confirm</button>
-        </div>
+        <form id="task-edit-form">
+          <input type="text" id="edit-task-input" class="input-area" placeholder="Edit task...">
+          <div class="button-container">
+            <button id="cancel-edit-btn">Exit</button>
+            <button type="submit">Confirm</button>
+          </div>
+        </form>
       </div>
     </div>
   </body>
