@@ -150,6 +150,15 @@ button[disabled] {
     gap: 10px;
     padding: 5px;
     cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#task-list li.task-item.completed {
+    background-color: #1a1a1a;
+}
+
+.task-item.completed span {
+    color: #555;
 }
 
 .status-circle {

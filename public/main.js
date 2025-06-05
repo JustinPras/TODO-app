@@ -135,6 +135,7 @@ async function getTasks() {
       statusCircle.classList.add('status-circle');
       if (task.completed) {
         statusCircle.classList.add('completed');
+        listItem.classList.add('completed');
       }
 
       statusCircle.onclick = async (e) => {
