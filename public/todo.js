@@ -1,25 +1,22 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
   
-    if (token) {
-      await getTasks();
-      
-      document.getElementById('auth-section').style.display = 'none';
-      document.getElementById('task-section').style.display = 'block';
+    if (!token) {
+      location.href = 'index.html';
+      return;
     } else {
-      document.getElementById('auth-section').style.display = 'block';
-      document.getElementById('task-section').style.display = 'none';
+      await getTasks();
     }
 });
 
 document.getElementById('task-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await createTask();
+  event.preventDefault();
+  await createTask();
 });
 
-document.getElementById('login-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    await login();
+document.getElementById('task-edit-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  await editTask();
 });
 
 async function createTask() {
@@ -42,9 +39,9 @@ async function createTask() {
 
     body.value = '';
     const taskID = data.id;
+    closeModal(modal)
     if (taskID) {
       await getTasks();
-      await taskStateHandler(taskID);
     }
   } catch (error) {
     alert(`Error: ${error.message}`);
@@ -52,70 +49,16 @@ async function createTask() {
   console.log("Task created successfully: ", bodyValue)
 }
   
-  
-async function login() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    try {
-    const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-        throw new Error(`Failed to login: ${data.error}`);
-    }
-
-    if (data.token) {
-        localStorage.setItem('token', data.token);
-        document.getElementById('auth-section').style.display = 'none';
-        document.getElementById('task-section').style.display = 'block';
-        await getTasks();
-    } else {
-        alert('Login failed. Please check your credentials.');
-    }
-    } catch (error) {
-    alert(`Error: ${error.message}`);
-    }
-}
-  
-async function signup() {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    try {
-        const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        });
-        if (!res.ok) {
-        const data = await res.json();
-        throw new Error(`Failed to create user: ${data.error}`);
-        }
-        console.log('User created!');
-        await login();
-    } catch (error) {
-        alert(`Error: ${error.message}`);
-    }
-}
-  
 function logout() {
     localStorage.removeItem('token');
-    document.getElementById('auth-section').style.display = 'block';
-    document.getElementById('task-section').style.display = 'none';
+    location.href = "index.html";
     resetTaskSelection()
 }
 
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
+  resetTaskSelection()
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -131,7 +74,6 @@ async function getTasks() {
     const tasks = await res.json();
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
-    
     for (const task of tasks) {
       const listItem = document.createElement('li');
       listItem.classList.add('task-item');
@@ -193,6 +135,7 @@ function createTaskStateHandler() {
       currentTaskID = taskID;
 
       await getTask(taskID);
+
       editTaskBtn.disabled = false;
       deleteTaskBtn.disabled = false;
     }
@@ -215,17 +158,11 @@ async function getTask(taskID) {
 
     const task = await res.json();
     currentTask = task;
+    // viewTask(task);
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
 }
-
-const editTaskBtn = document.getElementById('edit-task-btn');
-const deleteTaskBtn = document.getElementById('delete-task-btn');
-const editTaskContainer = document.getElementById('edit-task-container');
-const editTaskInput = document.getElementById('edit-task-input');
-const cancelEditBtn = document.getElementById('cancel-edit-btn');
-const confirmEditBtn = document.getElementById('confirm-edit-btn');
 
 async function deleteTask() {
   if (!currentTask) {
@@ -250,7 +187,13 @@ async function deleteTask() {
   }
 }
 
-async function editTask() {
+const editTaskBtn = document.getElementById('edit-task-btn');
+const deleteTaskBtn = document.getElementById('delete-task-btn');
+const editTaskContainer = document.getElementById('edit-task-container');
+const editTaskInput = document.getElementById('edit-task-input');
+const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+async function showEditTaskForm() {
   if (!currentTask) {
     alert('No task selected to edit.');
     return;
@@ -262,30 +205,31 @@ async function editTask() {
   cancelEditBtn.onclick = () => {
     editTaskInput.value = '';
     editTaskContainer.style.display = 'none';
+    resetTaskSelection()
   };
+}
 
-  confirmEditBtn.onclick = async () => {
-    const newBody = editTaskInput.value;
-    if (!newBody || !currentTask) return;
+async function editTask() {
+  const newBody = editTaskInput.value;
+  if (!newBody || !currentTask) return;
 
-    try {
-      const res = await fetch(`/api/tasks/${currentTask.id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify({ body: newBody }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to edit task.');
-      }
-      editTaskContainer.style.display = 'none';
-      editTaskInput.value = '';
-      await getTasks();
-    } catch (error) {
-      alert(`Error: ${error.message}`);
+  try {
+    const res = await fetch(`/api/tasks/${currentTask.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ body: newBody }),
+    });
+    if (!res.ok) {
+      throw new Error('Failed to edit task.');
     }
+    editTaskContainer.style.display = 'none';
+    editTaskInput.value = '';
+    await getTasks();
+  } catch (error) {
+    alert(`Error: ${error.message}`);
   }
 }
 
@@ -293,4 +237,46 @@ function resetTaskSelection() {
   currentTask = null;
   editTaskBtn.disabled = true;
   deleteTaskBtn.disabled = true;
+}
+
+const openModalButtons = document.querySelectorAll("[data-modal-target]");
+const closeModalButtons = document.querySelectorAll("[data-close-button]");
+const overlay = document.getElementById("overlay");
+
+openModalButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const modal = document.querySelector(button.dataset.modalTarget);
+    openModal(modal);
+  })
+})
+
+overlay.addEventListener("click", () => {
+  const modals = document.querySelectorAll(".modal.active");
+  modals.forEach(modal => {
+    closeModal(modal);
+  })
+})
+
+closeModalButtons.forEach(button => {
+  button.addEventListener("click", () => {
+    const modal = button.closest(".modal");
+    closeModal(modal);
+  })
+})
+
+function openModal(modal) {
+  if (modal == null) {
+    return;
+  }
+  modal.classList.add("active");
+  overlay.classList.add("active");
+}
+
+function closeModal(modal) {
+  if (modal == null) {
+    console.log("null modal to close")
+    return;
+  }
+  modal.classList.remove("active");
+  overlay.classList.remove("active");
 }

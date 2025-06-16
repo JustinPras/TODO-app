@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TODO App</title>
     <link rel="stylesheet" href="styles.css" />
-    <script src="main.js?v=={{ new Date().getTime() }}" defer></script> <!--Need to change this before prod-->
+    <script src="login.js?v=={{ new Date().getTime() }}" defer></script> <!--Need to change this before prod-->
   </head>
   <body>
     <div class="nav-bar">
@@ -13,10 +13,9 @@
         TODO App
         <span class="subtitle">The #1 tool for keeping organised</span>
       </h1>
-      <button onclick="logout()">Logout</button>
     </div>
 
-    <div id="auth-section">
+    <div id = "auth-section">
       <h2>Login</h2>
       <form id="login-form">
         <input
@@ -38,38 +37,6 @@
           <button onclick="signup()" type="button">Signup</button>
         </div>
       </form>
-    </div>
-
-    <div id="task-section" style="display: none">
-      <h2>Create Task</h2>
-      <form id="task-form">
-        <input
-          class="input-area"
-          type="text"
-          id="task"
-          placeholder="Task"
-          required
-        />
-        <div class="button-container">
-          <button type="submit">Add Task</button>
-        </div>
-      </form>
-      <h2>All Tasks</h2>
-      <ul id="task-list"></ul>
-      <div class="button-container mb-4">
-        <button id="edit-task-btn" onclick="editTask()" disabled>Edit Task</button>
-        <button id="delete-task-btn" onclick="deleteTask()" disabled>Delete Task</button>
-      </div>
-
-      <div id="edit-task-container" style="display: none; margin-top: 20px;">
-        <form id="task-form">
-          <input type="text" id="edit-task-input" class="input-area" placeholder="Edit task...">
-          <div class="button-container">
-            <button id="cancel-edit-btn">Exit</button>
-            <button id="confirm-edit-btn">Confirm</button>
-          </div>
-        </form>
-      </div>
     </div>
   </body>
 </html>
