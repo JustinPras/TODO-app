@@ -19,31 +19,32 @@
     </div>
 
     <div id="task-section">
-      <button data-modal-target="#modal">Add Task</button>
-      <div class="modal" id="modal">
-        <div class="modal-header">
-          <div class="title">Add Task</div>
-          <button data-close-button class="close-button"&times;></button>
-        </div>
-        <div class="modal-body">
-          <form id="task-form">
-            <textarea
-                class="input-area"
-                type="text"
-                id="task"
-                placeholder="Task"
-                required
-            ></textarea>
-            <div class="button-container">
-                <button type="submit">Confirm</button>
+      <div class="task-header">
+        <h2>Tasks</h2>
+        <button data-modal-target="#modal">Add Task</button>
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <div class="title">Add Task</div>
+                <button data-close-button class="close-button"&times;></button>
             </div>
-          </form>    
+            <div class="modal-body">
+                <form id="task-form">
+                    <textarea
+                        class="task-input-area"
+                        type="text"
+                        id="task"
+                        placeholder="Task"
+                        required
+                    ></textarea>
+                <div class="button-container">
+                    <button type="submit">Confirm</button>
+                </div>
+                </form>    
+            </div>
         </div>
+        <div id="overlay"></div>
       </div>
-      <div id="overlay"></div>
-
-      <h2>Tasks</h2>
-
+      
       <ul id="task-list"></ul>
       <div class="button-container mb-4">
         <button id="edit-task-btn" onclick="showEditTaskForm()" disabled>Edit Task</button>

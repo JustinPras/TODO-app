@@ -66,6 +66,16 @@ h2 {
 
 .input-area {
     width: 100%;
+    padding: 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    background-color: var(--input-bg);
+    color: var(--fg-color);
+    box-sizing: border-box;
+}
+
+.task-input-area {
+    width: 100%;
     height: 200px;
     padding: 10px;
     border: 1px solid var(--input-border);
@@ -238,4 +248,12 @@ button[disabled] {
     display: block;
     pointer-events: all;
     opacity: 1;
+}
+
+.task-header {
+    padding: 0px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid black;
 }
