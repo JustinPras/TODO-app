@@ -19,22 +19,30 @@
     </div>
 
     <div id="task-section">
-      <h2>Create Task</h2>
-
-      <form id="task-form">
-        <input
-          class="input-area"
-          type="text"
-          id="task"
-          placeholder="Task"
-          required
-        />
-        <div class="button-container">
-          <button type="submit">Add Task</button>
+      <button data-modal-target="#modal">Add Task</button>
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <div class="title">Add Task</div>
+          <button data-close-button class="close-button"&times;></button>
         </div>
-      </form>
+        <div class="modal-body">
+          <form id="task-form">
+            <input
+                class="input-area"
+                type="text"
+                id="task"
+                placeholder="Task"
+                required
+            />
+            <div class="button-container">
+                <button type="submit">Confirm</button>
+            </div>
+          </form>    
+        </div>
+      </div>
+      <div id="overlay"></div>
 
-      <h2>All Tasks</h2>
+      <h2>Tasks</h2>
 
       <ul id="task-list"></ul>
       <div class="button-container mb-4">
