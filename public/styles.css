@@ -123,6 +123,28 @@ button:hover {
 #task-list li:hover {
     background-color: #474747;
 }
+
+.task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+#task-list li.task-item.completed {
+    background-color: #1a1a1a;
+}
+
+#task-list li.task-item.completed:hover{
+    background-color: #2c2c2c;
+}
+
+.task-item.completed span {
+    color: #555;
+}
 #auth-section {
     max-width: 600px;
     margin: 0 auto;
@@ -152,23 +174,7 @@ button[disabled] {
     opacity: 0.7;
 }
 
-.task-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
 
-#task-list li.task-item.completed {
-    background-color: #1a1a1a;
-}
-
-.task-item.completed span {
-    color: #555;
-}
 
 .status-circle {
     display: inline-block;
