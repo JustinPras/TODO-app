@@ -120,10 +120,6 @@ button:hover {
     transition: background-color 0.3s ease;
 }
 
-#task-list li.selected {
-    background-color: #474747;
-  }
-
 #task-list li:hover {
     background-color: #474747;
 }

@@ -80,5 +80,6 @@ func (cfg *apiConfig) handlerTasksGet(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt:	dbTask.UpdatedAt,
 		Body:		dbTask.Body,
 		UserID:		dbTask.UserID,
+		Completed:	dbTask.Completed,
 	})
 }

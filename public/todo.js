@@ -41,6 +41,7 @@ async function createTask() {
     if (taskID) {
       await getTasks();
     }
+    console.log("Newly created task has completion status: ", data.completed);
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
@@ -52,8 +53,6 @@ function logout() {
     location.href = "index.html";
 }
 
-const taskStateHandler = createTaskStateHandler();
-
 async function getTasks() {
   try {
     const res = await fetch('/api/tasks', {
@@ -62,12 +61,12 @@ async function getTasks() {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
     });
+    const data = await res.json();
     if (!res.ok) {
-      const data = await res.json();
       throw new Error(`Failed to get tasks. Error: ${data.error}`);
     }
 
-    const tasks = await res.json();
+    const tasks = data;
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
     for (const task of tasks) {
@@ -82,27 +81,6 @@ async function getTasks() {
         statusCircle.classList.add('completed');
         listItem.classList.add('completed');
       }
-
-      statusCircle.onclick = async (e) => {
-        e.stopPropagation();
-
-        try {
-          const res = await fetch(`/api/tasks/${task.id}`, {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-            body: JSON.stringify({ completed: !task.completed }),
-          });
-          if (!res.ok) {
-            throw new Error('Failed to update task status.');
-          }
-          await getTasks();
-        } catch (err) {
-          alert(err.message);
-        }
-      };
 
       const leftWrapper = document.createElement('div');
       leftWrapper.classList.add("left-wrapper");
@@ -142,7 +120,7 @@ async function getTasks() {
       modalBody.classList.add("modal-body");
       
       const taskForm = document.createElement("form");
-      taskForm.id = "task-edit-form";
+      taskForm.id = "task-edit-form"+task.id;
       
       const taskInputArea = document.createElement("textarea");
       taskInputArea.classList.add("task-input-area");
@@ -182,21 +160,39 @@ async function getTasks() {
 
       listItem.append(leftWrapper);
       listItem.append(rightWrapper);
-
-      listItem.onclick = () => {
-        const items = taskList.querySelectorAll('li');
-        items.forEach(item => item.classList.remove('selected'));
-        listItem.classList.add('selected');
-
-        taskStateHandler(task.id);
-      };
+      
       listItem.dataset.taskId = task.id;
-      taskList.appendChild(listItem);
+      taskList.appendChild(listItem);  
     }
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
 }
+
+addGlobalClassEventListener("click", "task-item", async e => {
+  const taskItem = e.target;
+  const taskID = taskItem.dataset.taskId;
+  const task = await getTask(taskID);
+  console.log("Task completed: ", task.completed);
+  try {
+    const res = await fetch(`/api/tasks/${task.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ completed: !task.completed }),
+    });
+    if (!res.ok) {
+      throw new Error('Failed to update task status.');
+    }
+    const data = await res.json();
+    console.log("Task completion status after PATCH request: ", data.completed);
+    await getTasks();
+  } catch (err) {
+    alert(err.message);
+  }
+});
 
 addGlobalClassEventListener("click", "confirm-edit-button", e => {
   const modalBody = e.target.closest(".modal-body");
@@ -229,6 +225,7 @@ async function editTask(taskID, newBody) {
 }
 
 addGlobalClassEventListener("click", "edit-task", e => {
+  e.stopPropagation();
   const modal = document.querySelector(e.target.dataset.modalTarget);
   openModal(modal);
 });
@@ -238,7 +235,6 @@ addGlobalClassEventListener("click", "delete-task", e => {
   const taskID = taskItem.dataset.taskId;
   taskItem.remove();
   deleteTask(taskID);
-  
 })
 
 function addGlobalClassEventListener(type, className, callback) {
@@ -265,20 +261,6 @@ async function deleteTask(taskID) {
   }
 }
 
-function createTaskStateHandler() {
-  let currentTaskID = null;
-
-  return async function handleTaskClick(taskID) {
-    if (currentTaskID !== taskID) {
-      currentTaskID = taskID;
-
-      await getTask(taskID);
-    }
-  };
-}
-
-let currentTask = null;
-
 async function getTask(taskID) {
   try {
     const res = await fetch(`/api/tasks/${taskID}`, {
@@ -292,7 +274,7 @@ async function getTask(taskID) {
     }
 
     const task = await res.json();
-    currentTask = task;
+    return task;
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
@@ -301,8 +283,6 @@ async function getTask(taskID) {
 const openModalButtons = document.querySelectorAll("[data-modal-target]");
 const closeModalButtons = document.querySelectorAll("[data-close-button]");
 const overlay = document.getElementById("overlay");
-
-
 
 openModalButtons.forEach(button => {
   button.addEventListener("click", () => {
