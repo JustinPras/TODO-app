@@ -21,18 +21,17 @@
     <div id="task-section">
       <div class="task-header">
         <h2>Tasks</h2>
-        <button data-modal-target="#modal">Add Task</button>
-        <div class="modal" id="modal">
+        <button data-modal-target="#modal-add-task">Add Task</button>
+        <div class="modal" id="modal-add-task">
             <div class="modal-header">
                 <div class="title">Add Task</div>
                 <button data-close-button class="close-button"&times;></button>
             </div>
             <div class="modal-body">
-                <form id="task-form">
+                <form id="task-create-form">
                     <textarea
                         class="task-input-area"
-                        type="text"
-                        id="task"
+                        id="task-create"
                         placeholder="Task"
                         required
                     ></textarea>
@@ -46,20 +45,6 @@
       </div>
       
       <ul id="task-list"></ul>
-      <div class="button-container mb-4">
-        <button id="edit-task-btn" onclick="showEditTaskForm()" disabled>Edit Task</button>
-        <button id="delete-task-btn" onclick="deleteTask()" disabled>Delete Task</button>
-      </div>
-
-      <div id="edit-task-container" style="display: none; margin-top: 20px;">
-        <form id="task-edit-form">
-          <input type="text" id="edit-task-input" class="input-area" placeholder="Edit task...">
-          <div class="button-container">
-            <button id="cancel-edit-btn">Exit</button>
-            <button type="submit">Confirm</button>
-          </div>
-        </form>
-      </div>
 
     </div>
   </body>

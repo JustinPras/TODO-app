@@ -159,6 +159,7 @@ button[disabled] {
 .task-item {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
     padding: 5px;
     cursor: pointer;
@@ -257,4 +258,10 @@ button[disabled] {
     justify-content: space-between;
     align-items: center;
     border-bottom: 3px solid black;
+}
+
+.right-wrapper {
+    display: flex;
+    justify-content: space-between;
+    width: 10rem;
 }

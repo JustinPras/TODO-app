@@ -9,18 +9,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-document.getElementById('task-form').addEventListener('submit', async (event) => {
+document.getElementById('task-create-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   await createTask();
 });
 
-document.getElementById('task-edit-form').addEventListener('submit', async (event) => {
-  event.preventDefault();
-  await editTask();
-});
-
 async function createTask() {
-  const body = document.getElementById('task')
+  const body = document.getElementById('task-create')
   const bodyValue = body.value;
   
   try {
@@ -39,7 +34,10 @@ async function createTask() {
 
     body.value = '';
     const taskID = data.id;
-    closeModal(modal)
+    
+    const modal = document.querySelector(".modal.active");
+    closeModal(modal);
+
     if (taskID) {
       await getTasks();
     }
@@ -52,13 +50,11 @@ async function createTask() {
 function logout() {
     localStorage.removeItem('token');
     location.href = "index.html";
-    resetTaskSelection()
 }
 
 const taskStateHandler = createTaskStateHandler();
 
 async function getTasks() {
-  resetTaskSelection()
   try {
     const res = await fetch('/api/tasks', {
       method: 'GET',
@@ -75,10 +71,13 @@ async function getTasks() {
     const taskList = document.getElementById('task-list');
     taskList.innerHTML = '';
     for (const task of tasks) {
+      
       const listItem = document.createElement('li');
       listItem.classList.add('task-item');
+
       const statusCircle = document.createElement('span');
       statusCircle.classList.add('status-circle');
+
       if (task.completed) {
         statusCircle.classList.add('completed');
         listItem.classList.add('completed');
@@ -96,7 +95,6 @@ async function getTasks() {
             },
             body: JSON.stringify({ completed: !task.completed }),
           });
-
           if (!res.ok) {
             throw new Error('Failed to update task status.');
           }
@@ -106,11 +104,86 @@ async function getTasks() {
         }
       };
 
+      const leftWrapper = document.createElement('div');
+      leftWrapper.classList.add("left-wrapper");
+
       const text = document.createElement('span');
+      text.classList.add('task-text');
       text.textContent = task.body;
 
-      listItem.appendChild(statusCircle);
-      listItem.appendChild(text);
+      const rightWrapper = document.createElement('div');
+      rightWrapper.classList.add('right-wrapper');
+
+      const editBtn = document.createElement('button');
+      editBtn.classList.add('edit-task');
+      editBtn.dataset.modalTarget = "#modal-edit-task-"+task.id;
+      editBtn.textContent = 'Edit';
+
+      const modal = document.createElement("div");
+      modal.classList.add("modal");
+      modal.id = "modal-edit-task-"+task.id;
+
+      const modalHeader = document.createElement('div');
+      modalHeader.classList.add("modal-header");
+      
+      const title = document.createElement("div");
+      title.classList.add("title");
+      title.textContent = "Edit Task";
+      
+      const closeButton = document.createElement("button");
+      closeButton.setAttribute("data-close-button", "");
+      closeButton.classList.add("close-button");
+      closeButton.innerHTML = "&times;";
+
+      modalHeader.append(title);
+      modalHeader.append(closeButton);
+
+      const modalBody = document.createElement("div");
+      modalBody.classList.add("modal-body");
+      
+      const taskForm = document.createElement("form");
+      taskForm.id = "task-edit-form";
+      
+      const taskInputArea = document.createElement("textarea");
+      taskInputArea.classList.add("task-input-area");
+      taskInputArea.id = "task-edit-"+task.id;
+      taskInputArea.placeholder = task.body;
+      console.log("task body: ", task.body);
+      console.log("task body placeholder: ", taskInputArea.placeholder);
+      taskInputArea.required = true;
+
+      taskForm.append(taskInputArea);
+      
+      const buttonContainer = document.createElement("div");
+      buttonContainer.classList.add("button-container");
+
+      const confirmButton = document.createElement("button");
+      confirmButton.classList.add("confirm-edit-button");
+      confirmButton.textContent = "Confirm Edit";
+
+      buttonContainer.append(confirmButton);
+
+      modalBody.append(taskForm);
+      modalBody.append(buttonContainer);
+
+      modal.append(modalHeader);
+      modal.append(modalBody);
+
+      editBtn.append(modal);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.classList.add('delete-task');
+      deleteBtn.textContent = 'Delete';
+      
+      leftWrapper.append(statusCircle);
+      leftWrapper.append(text);
+
+      rightWrapper.append(editBtn);
+      rightWrapper.append(deleteBtn);
+
+
+      listItem.append(leftWrapper);
+      listItem.append(rightWrapper);
 
       listItem.onclick = () => {
         const items = taskList.querySelectorAll('li');
@@ -119,11 +192,94 @@ async function getTasks() {
 
         taskStateHandler(task.id);
       };
-
+      listItem.dataset.taskId = task.id;
       taskList.appendChild(listItem);
     }
   } catch (error) {
     alert(`Error: ${error.message}`);
+  }
+}
+
+addGlobalClassEventListener("click", "confirm-edit-button", e => {
+  const modalBody = e.target.closest(".modal-body");
+  const taskEditForm = modalBody.firstChild;
+  console.log(taskEditForm);
+});
+
+async function editTask(taskID, newBody) {
+  try {
+    const res = await fetch(`/api/tasks/${taskID}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+      body: JSON.stringify({ body: newBody }),
+    });
+    if (!res.ok) {
+      throw new Error('Failed to edit task.');
+    }
+    await getTasks();
+  } catch(error) {
+    alert(`Error: ${error.message}`);
+  }
+}
+
+addGlobalClassEventListener("click", "edit-task", e => {
+  const modal = document.querySelector(e.target.dataset.modalTarget);
+  openModal(modal);
+});
+
+addGlobalClassEventListener("click", "delete-task", e => {
+  const taskItem = e.target.closest(".task-item");
+  const taskID = taskItem.dataset.taskId;
+  taskItem.remove();
+  deleteTask(taskID);
+  
+})
+
+function addGlobalClassEventListener(type, className, callback) {
+  document.addEventListener(type, e => {
+    if (e.target.classList.contains(className)) callback(e);
+  });
+}
+
+async function deleteTask(taskID) {
+  try {
+    const res = await fetch(`/api/tasks/${taskID}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    if (!res.ok) {
+      throw new Error("Failed to delete task.");
+    }
+    console.log("Task deleted successfully!");
+    await getTasks();
+  } catch (error) {
+    alert(`Error: ${error.message}`);
+  }
+}
+
+
+// Edit
+function editTask(taskID) {
+  const taskItem = e.target.closest(".task-item");
+  const taskText = taskItem.querySelector(".task-text");
+  const newText = prompt("Edit task:", taskText.textContent);
+  if (newText !== null && newText.trim() !== "") {
+    taskText.textContent = newText;
+
+    const taskId = taskItem.dataset.taskId;
+    fetch(`/api/tasks/${taskId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify({ body: newText })
+    });
   }
 }
 
@@ -135,9 +291,6 @@ function createTaskStateHandler() {
       currentTaskID = taskID;
 
       await getTask(taskID);
-
-      editTaskBtn.disabled = false;
-      deleteTaskBtn.disabled = false;
     }
   };
 }
@@ -158,90 +311,16 @@ async function getTask(taskID) {
 
     const task = await res.json();
     currentTask = task;
-    // viewTask(task);
   } catch (error) {
     alert(`Error: ${error.message}`);
   }
-}
-
-async function deleteTask() {
-  if (!currentTask) {
-    alert('No task selected for deletion.');
-    return;
-  }
-  try {
-    const res = await fetch(`/api/tasks/${currentTask.id}`, {
-      method: 'DELETE',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-    });
-    if (!res.ok) {
-      throw new Error('Failed to delete task.');
-    }
-    console.log("Task deleted successfully!")
-    currentTask = null;
-    await getTasks();
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  }
-}
-
-const editTaskBtn = document.getElementById('edit-task-btn');
-const deleteTaskBtn = document.getElementById('delete-task-btn');
-const editTaskContainer = document.getElementById('edit-task-container');
-const editTaskInput = document.getElementById('edit-task-input');
-const cancelEditBtn = document.getElementById('cancel-edit-btn');
-
-async function showEditTaskForm() {
-  if (!currentTask) {
-    alert('No task selected to edit.');
-    return;
-  }
-
-  editTaskInput.value = currentTask.body;
-  editTaskContainer.style.display = 'block';
-
-  cancelEditBtn.onclick = () => {
-    editTaskInput.value = '';
-    editTaskContainer.style.display = 'none';
-    resetTaskSelection()
-  };
-}
-
-async function editTask() {
-  const newBody = editTaskInput.value;
-  if (!newBody || !currentTask) return;
-
-  try {
-    const res = await fetch(`/api/tasks/${currentTask.id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ body: newBody }),
-    });
-    if (!res.ok) {
-      throw new Error('Failed to edit task.');
-    }
-    editTaskContainer.style.display = 'none';
-    editTaskInput.value = '';
-    await getTasks();
-  } catch (error) {
-    alert(`Error: ${error.message}`);
-  }
-}
-
-function resetTaskSelection() {
-  currentTask = null;
-  editTaskBtn.disabled = true;
-  deleteTaskBtn.disabled = true;
 }
 
 const openModalButtons = document.querySelectorAll("[data-modal-target]");
 const closeModalButtons = document.querySelectorAll("[data-close-button]");
 const overlay = document.getElementById("overlay");
+
+
 
 openModalButtons.forEach(button => {
   button.addEventListener("click", () => {
