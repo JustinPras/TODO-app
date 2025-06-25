@@ -148,8 +148,6 @@ async function getTasks() {
       taskInputArea.classList.add("task-input-area");
       taskInputArea.id = "task-edit-"+task.id;
       taskInputArea.placeholder = task.body;
-      console.log("task body: ", task.body);
-      console.log("task body placeholder: ", taskInputArea.placeholder);
       taskInputArea.required = true;
 
       taskForm.append(taskInputArea);
@@ -203,7 +201,12 @@ async function getTasks() {
 addGlobalClassEventListener("click", "confirm-edit-button", e => {
   const modalBody = e.target.closest(".modal-body");
   const taskEditForm = modalBody.firstChild;
-  console.log(taskEditForm);
+  const body = taskEditForm.firstChild;
+  const taskID = body.id.replace("task-edit-", "");
+  const bodyValue = body.value;
+  editTask(taskID, bodyValue);
+  const modal = document.querySelector(".modal.active");
+  closeModal(modal);
 });
 
 async function editTask(taskID, newBody) {
@@ -259,27 +262,6 @@ async function deleteTask(taskID) {
     await getTasks();
   } catch (error) {
     alert(`Error: ${error.message}`);
-  }
-}
-
-
-// Edit
-function editTask(taskID) {
-  const taskItem = e.target.closest(".task-item");
-  const taskText = taskItem.querySelector(".task-text");
-  const newText = prompt("Edit task:", taskText.textContent);
-  if (newText !== null && newText.trim() !== "") {
-    taskText.textContent = newText;
-
-    const taskId = taskItem.dataset.taskId;
-    fetch(`/api/tasks/${taskId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`
-      },
-      body: JSON.stringify({ body: newText })
-    });
   }
 }
 
